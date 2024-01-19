@@ -23,12 +23,19 @@ let persons = [
       id: 4,
       name: "Mary Poppendieck", 
       number: "39-23-6423122"
-    }
+    },
+    { 
+        id: 5,
+        name: "Gino Gini", 
+        number: "39-23-6423122"
+      }
 ]
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hello World!</h1>')
-  })
+
+app.get('/info', (req, res) => {
+    res.send(`<p>Phonebook has info for ${persons.length} people!</p>
+    <p>${Date()}</p>`)
+})
 
 app.get('/api/persons', (req, res) => {
     res.json(persons)
@@ -44,6 +51,13 @@ app.get('/api/persons/:id', (request, response) => {
       response.status(404).end()
     }
   
+})
+
+app.delete('/api/persons/:id', (request, response) =>{
+    const id = Number(request.params.id)
+    persons = persons.filter(person => person.id !== id)
+
+    response.status(204).end()
 })
 
 const PORT = 3001
