@@ -1,6 +1,13 @@
+require('dotenv').config({path: './mongodb_uri.env'})
+
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+const cors = require('cors')
+const Person = require('./models/person')
+
+app.use(express.static('dist'))
+app.use(cors())
 
 morgan.token("content", function getContent(req) {
   return req.method === "POST" ? JSON.stringify(req.body) : "";
@@ -44,8 +51,10 @@ app.get("/info", (req, res) => {
     <p>${Date()}</p>`);
 });
 
-app.get("/api/persons", (req, res) => {
-  res.json(persons);
+app.get("/api/persons", (request, response) => {
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 });
 
 const generateId = () => {
@@ -73,15 +82,14 @@ app.post("/api/persons", (request, response) => {
     });
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  };
+  })
 
-  persons = persons.concat(person);
-
-  response.json(person);
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 });
 
 app.get("/api/persons/:id", (request, response) => {
@@ -102,7 +110,7 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
